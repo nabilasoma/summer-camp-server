@@ -29,6 +29,30 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+    const classCollection = client.db('myYogaDb').collection('classes');
+    const instructorCollections = client.db('myYogaDb').collection('instructors');
+
+
+
+    // show 6 cards classes api
+    app.get('/classes', async(req, res) => {
+      const query = {};
+      const options = {
+        // sort returned documents in ascending order by title (A->Z)
+        sort: { "studentNumber": -1 },
+      };
+      const result = await classCollection.find(query, options).toArray();
+      res.send(result);
+    })
+
+
+
+    // all instructors get api for Instructors Page
+    app.get('/instructors', async (req, res) => {
+      const result = await instructorCollections.find().toArray();
+      res.send(result)
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
