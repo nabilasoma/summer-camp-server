@@ -2,7 +2,7 @@ const express = require('express')
 const app = express();
 const cors = require('cors')
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 4000
 
 
@@ -31,7 +31,52 @@ async function run() {
 
     const classCollection = client.db('myYogaDb').collection('classes');
     const instructorCollections = client.db('myYogaDb').collection('instructors');
+    const approveClassesCollection = client.db('myYogaDb').collection('approveClasses');
+    const selectedClassesCollection = client.db('myYogaDb').collection('selectedClasses');
+    const userCollection = client.db('myYogaDb').collection('users');
 
+
+    // user related api
+    app.post('/users', async(req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
+
+
+
+    // selected class api. when I select any class it will show in my selected page
+    app.get('/selectedClasses', async(req, res) => {
+      const email = req.query.email;
+      if(!email){
+        return res.send([]);
+      }
+      const query = {email: email}
+      const result = await selectedClassesCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    app.post('/selectedClasses', async(req, res) => {
+      const item = req.body;
+      console.log(item)
+      const result = await selectedClassesCollection.insertOne(item)
+      res.send(result)
+    })
+
+    app.delete('/selectedClasses/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await selectedClassesCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+
+    // for showing all classed card in Classes Page
+    app.get('/approveClasses', async(req, res) => {
+      const result = await approveClassesCollection.find().toArray();
+      res.send(result)
+    })
 
 
     // show 6 cards classes api
