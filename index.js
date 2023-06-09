@@ -30,9 +30,9 @@ const verifyJWT = async(req, res, next) => {
 }
 
 
+const uri = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ac-qizxwwv-shard-00-00.5rfymji.mongodb.net:27017,ac-qizxwwv-shard-00-01.5rfymji.mongodb.net:27017,ac-qizxwwv-shard-00-02.5rfymji.mongodb.net:27017/?ssl=true&replicaSet=atlas-14dsd9-shard-0&authSource=admin&retryWrites=true&w=majority`
 
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5rfymji.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5rfymji.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -53,6 +53,8 @@ async function run() {
     const approveClassesCollection = client.db('myYogaDb').collection('approveClasses');
     const selectedClassesCollection = client.db('myYogaDb').collection('selectedClasses');
     const userCollection = client.db('myYogaDb').collection('users');
+    const addAClassCollection = client.db('myYogaDb').collection('addaclasses');
+    
 
 
     app.post('/jwt', (req, res) => {
@@ -117,7 +119,7 @@ async function run() {
       const result = {admin: user?.role === 'admin'}
       res.send(result);
     });
-    
+
 
     app.get('/users/instructor/:email', async(req, res) => {
       const email = req.params.email;
@@ -127,6 +129,13 @@ async function run() {
       res.send(result);
     });
 
+
+    // add a class api
+    app.post('/addaclasses', async(req, res) => {
+      const addclass = req.body;
+      const result = await addAClassCollection.insertOne(addclass);
+      res.send(result);
+    })
     
 
     // selected class api. when I select any class it will show in my selected page
