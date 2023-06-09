@@ -12,6 +12,24 @@ app.use(express.json())
 
 
 
+const verifyJWT = async(req, res, next) => {
+  const authorization = req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error: true, message: 'Unauthorized User'})
+  }
+  // bearer token
+  const token = authorization.split(' ')[1];
+
+  jwt.verify(token, process.env.SECRET_TOKEN, (error, decoded) => {
+    if(error){
+      return res.status(403).send({error: true, message: 'Unauthorized User'})
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
+
+
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5rfymji.mongodb.net/?retryWrites=true&w=majority`;
@@ -35,6 +53,14 @@ async function run() {
     const approveClassesCollection = client.db('myYogaDb').collection('approveClasses');
     const selectedClassesCollection = client.db('myYogaDb').collection('selectedClasses');
     const userCollection = client.db('myYogaDb').collection('users');
+
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET_TOKEN, {expiresIn: '72h'})
+      res.send({token})
+    })
+
 
 
     // user related api
@@ -83,6 +109,25 @@ async function run() {
       res.send(result)
     });
 
+
+    app.get('/users/admin/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+      const result = {admin: user?.role === 'admin'}
+      res.send(result);
+    });
+    
+
+    app.get('/users/instructor/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = {email: email};
+      const user = await userCollection.findOne(query);
+      const result = { instructor: user?.role === 'instructor' }
+      res.send(result);
+    });
+
+    
 
     // selected class api. when I select any class it will show in my selected page
     app.get('/selectedClasses', async(req, res) => {
