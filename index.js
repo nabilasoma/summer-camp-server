@@ -56,6 +56,7 @@ async function run() {
     const userCollection = client.db('myYogaDb').collection('users');
     const addAClassCollection = client.db('myYogaDb').collection('addaclasses');
     const myClassCollection = client.db('myYogaDb').collection('myclasses');
+    const paymentCollection = client.db('myYogaDb').collection('payments');
     
 
 
@@ -208,9 +209,9 @@ async function run() {
 
 
     // create payment intend
-    app.post('/create-payment-intent', verifyJWT,  async(req, res) => {
-      const {price} = req.body;
-      const amount = price*100;
+    app.post('/create-payment-intent',   async(req, res) => {
+      // const {price} = req.body;
+      const amount = 100*100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: 'usd',
@@ -221,6 +222,8 @@ async function run() {
       })
     })
 
+
+    // payment post api
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
