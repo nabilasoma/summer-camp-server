@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors')
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 4000
 
@@ -170,10 +171,6 @@ async function run() {
       res.send(result);
     });
 
-   
-    
-
-
 
 
     // for showing all classed card in Classes Page
@@ -200,6 +197,22 @@ async function run() {
     app.get('/instructors', async (req, res) => {
       const result = await instructorCollections.find().toArray();
       res.send(result)
+    })
+
+
+
+    // create payment intend
+    app.post('/create-payment-intent', async(req, res) => {
+      const {price} = req.body;
+      const amount = price*100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
     })
 
 
