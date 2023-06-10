@@ -54,6 +54,7 @@ async function run() {
     const selectedClassesCollection = client.db('myYogaDb').collection('selectedClasses');
     const userCollection = client.db('myYogaDb').collection('users');
     const addAClassCollection = client.db('myYogaDb').collection('addaclasses');
+    const myClassCollection = client.db('myYogaDb').collection('myclasses');
     
 
 
@@ -135,8 +136,14 @@ async function run() {
       const addclass = req.body;
       const result = await addAClassCollection.insertOne(addclass);
       res.send(result);
+    });
+
+ // My Classes Instructor api
+
+    app.get('/addaclasses', async(req, res) => {
+      const result = await addAClassCollection.find().toArray();
+      res.send(result);
     })
-    
 
     // selected class api. when I select any class it will show in my selected page
     app.get('/selectedClasses', async(req, res) => {
@@ -147,21 +154,25 @@ async function run() {
       const query = {email: email}
       const result = await selectedClassesCollection.find(query).toArray()
       res.send(result)
-    })
+    });
 
     app.post('/selectedClasses', async(req, res) => {
       const item = req.body;
       console.log(item)
       const result = await selectedClassesCollection.insertOne(item)
       res.send(result)
-    })
+    });
 
     app.delete('/selectedClasses/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
       const result = await selectedClassesCollection.deleteOne(query);
       res.send(result);
-    })
+    });
+
+   
+    
+
 
 
 
