@@ -171,8 +171,14 @@ async function run() {
       res.send(result);
     });
 
-
-
+// payment er get api
+    app.get('/selectedClasses/:id', async(req, res) => {
+       const id = req.params.id;
+       const query = {_id: new ObjectId(id)}
+       const result = await selectedClassesCollection.findOne(query);
+       res.send(result);
+    })
+////////////
     // for showing all classed card in Classes Page
     app.get('/approveClasses', async(req, res) => {
       const result = await approveClassesCollection.find().toArray();
@@ -202,7 +208,7 @@ async function run() {
 
 
     // create payment intend
-    app.post('/create-payment-intent', async(req, res) => {
+    app.post('/create-payment-intent', verifyJWT,  async(req, res) => {
       const {price} = req.body;
       const amount = price*100;
       const paymentIntent = await stripe.paymentIntents.create({
