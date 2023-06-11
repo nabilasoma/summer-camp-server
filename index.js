@@ -226,7 +226,25 @@ async function run() {
     // payment post api
     app.post('/payments', async(req, res) => {
       const payment = req.body;
-      const result = await paymentCollection.insertOne(payment);
+      const insertedResult = await paymentCollection.insertOne(payment);
+
+
+      const query = {_id: {$in: payment.items.map(id => new ObjectId(id))}}
+      const deletedResult = await selectedClassesCollection.deleteMany(query);
+
+
+
+      res.send(insertedResult, deletedResult);
+    });
+
+
+    app.get('/payments', async(req, res) => {
+
+      // const options = {
+      //   // sort returned documents in ascending order by title (A->Z)
+      //   sort: { "date": -1 },
+      // };
+      const result = await paymentCollection.find().toArray();
       res.send(result);
     })
 
