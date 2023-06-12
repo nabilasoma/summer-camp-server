@@ -221,7 +221,7 @@ app.get('/instructors', async (req, res) => {
 
 
 // create payment intend
-app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+app.post('/create-payment-intent', async (req, res) => {
   // const {price} = req.body;
   const amount = 100 * 100;
   const paymentIntent = await stripe.paymentIntents.create({
@@ -236,29 +236,27 @@ app.post('/create-payment-intent', verifyJWT, async (req, res) => {
 
 
 // payment post api
+app.post('/payments',verifyJWT, async (req, res) => {
+  const payment = req.body;
+  const insertedResult = await paymentCollection.insertOne(payment);
+
+  const query = { _id: { $in: payment.items.map(id => new ObjectId(id)) } }
+
+  const deletedResult = await selectedClassesCollection.deleteMany(query);
+
+  res.send({insertedResult, deletedResult});
+});
+
 // app.post('/payments/:id', async (req, res) => {
-//   const payment = req.body;
+//   const id = req.params.id;
+//   const query = {_id: new ObjectId(id)}
 //   const insertedResult = await paymentCollection.insertOne(payment);
 
-//   // const query = { _id: { $in: payment.items.map(id => new ObjectId(id)) } }
 
-//   const deletedResult = await selectedClassesCollection.deleteMany(query);
+//   const deletedResult = await selectedClassesCollection.deleteOne(query);
 
 //   res.send(insertedResult, deletedResult);
 // });
-
-app.post('/payments/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = {_id: new ObjectId(id)}
-  const insertedResult = await paymentCollection.insertOne(payment);
-
-
-  const deletedResult = await selectedClassesCollection.deleteOne(query);
-
-  res.send(insertedResult, deletedResult);
-});
-
-
 
 
 
